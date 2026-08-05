@@ -1,7 +1,7 @@
 package com.example.raporkayit.controller;
 
 import com.example.raporkayit.dto.MukellefResponse; //Yalnızca görünmesini istediğimiz bilgileri taşıyan DTO’yu veriyor.
-import com.example.raporkayit.service.SicilService; //Bulunan entity’yi MukellefResponse DTO’suna çeviriyor.
+import com.example.raporkayit.service.SicilService; // Mükellef sorgulama iş kurallarını çalıştıran servis
 import org.springframework.web.bind.annotation.*; //Spring’in web anotasyonlarını kullanabilmemizi sağlar.
 
 @RestController //Bu sınıf HTTP isteklerini karşılayan bir REST controller’dır. Metotların döndürdüğü nesneleri JSON’a çevir
