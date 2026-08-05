@@ -1,0 +1,11 @@
+### Aktif ana rapor türlerini getir
+GET http://localhost:8080/api/referanslar/ana-rapor-turleri
+Accept: application/json
+
+### Seçilen ana türe bağlı rapor türlerini getir
+GET http://localhost:8080/api/referanslar/ana-rapor-turleri/fef60cfd-a4d4-40a0-9cb0-a179101e4ef0/rapor-turleri
+Accept: application/json
+
+### Aktif vergi kodlarını getir
+GET http://localhost:8080/api/referanslar/vergi-kodlari
+Accept: application/json
