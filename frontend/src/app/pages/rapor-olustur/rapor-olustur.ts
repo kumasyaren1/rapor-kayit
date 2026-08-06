@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-rapor-olustur',
-  imports: [],
+  imports: [ButtonModule],
   templateUrl: './rapor-olustur.html',
   styleUrl: './rapor-olustur.scss',
 })

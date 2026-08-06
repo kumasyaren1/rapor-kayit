@@ -152,15 +152,23 @@
     cursor: pointer;
   }
 }
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-.cancel-button {
-  border: 1px solid #203f67;
-  background-color: white;
-  color: #203f67;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
 
-  &:hover {
-    background-color: #f1f5f9;
-  }
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.user-menu:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
 
 .save-button {

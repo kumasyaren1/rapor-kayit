@@ -2,7 +2,11 @@
 
   <header class="topbar">
     <h1>RAPOR KAYIT SİSTEMİ</h1>
-    <span>Kullanıcı</span>
+    <button type="button" class="user-menu">
+      <i class="pi pi-user"></i>
+      <span>Kullanıcı</span>
+      <i class="pi pi-chevron-down"></i>
+    </button>
   </header>
 
   <main class="content">
@@ -95,13 +99,15 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="cancel-button">
-          İptal
-        </button>
-
-        <button type="button" class="save-button">
-          Kaydet
-        </button>
+        <p-button
+          label="İptal"
+          type="button"
+          [outlined]="true">
+        </p-button>
+        <p-button
+          label="Kaydet"
+          type="button">
+        </p-button>
       </div>
 
     </section>
