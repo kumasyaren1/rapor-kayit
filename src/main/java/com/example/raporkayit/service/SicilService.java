@@ -29,26 +29,29 @@ public class SicilService {
 
         Mukellef mukellef; // mükellef türünde değişken tanımladık
 
-        if (vknVar) {
+        if (vknVar && tcknVar) {
+            mukellef = mukellefRepository
+                    .findByVergiKimlikNoAndTcKimlikNoAndAktifTrue(
+                            vergiKimlikNo,
+                            tcKimlikNo
+                    )
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Girilen VKN ve TCKN ile eşleşen aktif mükellef bulunamadı."
+                    ));
+
+        } else if (vknVar) {
             mukellef = mukellefRepository
                     .findByVergiKimlikNoAndAktifTrue(vergiKimlikNo)
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Girilen Vergi Kimlik No ile aktif mükellef bulunamadı."
                     ));
+
         } else {
             mukellef = mukellefRepository
                     .findByTcKimlikNoAndAktifTrue(tcKimlikNo)
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Girilen T.C. Kimlik No ile aktif mükellef bulunamadı."
                     ));
-        }
-
-        if (vknVar && tcknVar
-                && !tcKimlikNo.equals(mukellef.getTcKimlikNo())) {
-
-            throw new IllegalArgumentException(
-                    "Girilen VKN ve TCKN aynı mükellefe ait değildir."
-            );
         }
 
         return new MukellefResponse( //dto

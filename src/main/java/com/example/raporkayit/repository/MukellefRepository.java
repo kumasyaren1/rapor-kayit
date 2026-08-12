@@ -15,4 +15,8 @@ public interface MukellefRepository
     Optional<Mukellef> findByTcKimlikNoAndAktifTrue(
             String tcKimlikNo
     );
+    Optional<Mukellef> findByVergiKimlikNoAndTcKimlikNoAndAktifTrue(
+            String vergiKimlikNo,
+            String tcKimlikNo
+    );
 }
