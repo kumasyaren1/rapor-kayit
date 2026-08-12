@@ -11,34 +11,48 @@
 
   <main class="content">
 
-    <section class="form-card">
+    <form
+      class="form-card"
+      [formGroup]="raporForm">
 
       <!-- Mükellef bilgileri -->
       <h3>Mükellef Bilgileri</h3>
 
       <div class="form-grid taxpayer-grid">
         <div class="form-field">
-          <label for="vergiKimlikNo">Vergi Kimlik No</label>
+          <label for="vergiKimlikNo">
+            Vergi Kimlik No
+          </label>
           <input
             id="vergiKimlikNo"
             type="text"
-            maxlength="10">
+            maxlength="10"
+            inputmode="numeric"
+            formControlName="vergiKimlikNo"
+            (blur)="mukellefSorgula()">
         </div>
 
         <div class="form-field">
-          <label for="tcKimlikNo">T.C. Kimlik No</label>
+          <label for="tcKimlikNo">
+            T.C. Kimlik No
+          </label>
           <input
             id="tcKimlikNo"
             type="text"
-            maxlength="11">
+            maxlength="11"
+            inputmode="numeric"
+            formControlName="tcKimlikNo"
+            (blur)="mukellefSorgula()">
         </div>
 
         <div class="form-field">
-          <label for="adSoyadUnvan">Ad Soyad / Unvan</label>
+          <label for="adSoyadUnvan">
+            Ad Soyad / Unvan
+          </label>
           <input
             id="adSoyadUnvan"
             type="text"
-            readonly>
+            formControlName="adSoyadUnvan">
         </div>
       </div>
 
@@ -110,7 +124,7 @@
         </p-button>
       </div>
 
-    </section>
+    </form>
 
   </main>
 
