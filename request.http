@@ -9,3 +9,58 @@ Accept: application/json
 ### Aktif vergi kodlarını getir
 GET http://localhost:8080/api/referanslar/vergi-kodlari
 Accept: application/json
+### Yeni rapor oluştur
+POST http://localhost:8080/api/raporlar
+Content-Type: application/json
+
+{
+  "vergiKimlikNo": "1234567890",
+  "tcKimlikNo": null,
+  "anaRaporTuruId": "fef60cfd-a4d4-40a0-9cb0-a179101e4ef0",
+  "raporTuruId": "40a07a33-2601-44ac-84ce-61b0aa944a23",
+  "vergiKoduId": "5e45198b-38e1-4235-9c4a-3b01ddab3715",
+  "duzenlemeTarihi": "2026-08-10",
+  "aciklama": "Test raporu"
+}
+### Hata testi: VKN ve TCKN ikisi de boş
+POST http://localhost:8080/api/raporlar
+Content-Type: application/json
+
+{
+  "vergiKimlikNo": null,
+  "tcKimlikNo": null,
+  "anaRaporTuruId": "fef60cfd-a4d4-40a0-9cb0-a179101e4ef0",
+  "raporTuruId": "40a07a33-2601-44ac-84ce-61b0aa944a23",
+  "vergiKoduId": "5e45198b-38e1-4235-9c4a-3b01ddab3715",
+  "duzenlemeTarihi": "2026-08-10",
+  "aciklama": "Hata testi"
+}
+
+### Hata testi: Düzenleme tarihi ileri  bir tarih olmaz.
+POST http://localhost:8080/api/raporlar
+Content-Type: application/json
+
+{
+  "vergiKimlikNo": 1234567890,
+  "tcKimlikNo": null,
+  "anaRaporTuruId": "fef60cfd-a4d4-40a0-9cb0-a179101e4ef0",
+  "raporTuruId": "40a07a33-2601-44ac-84ce-61b0aa944a23",
+  "vergiKoduId": "5e45198b-38e1-4235-9c4a-3b01ddab3715",
+  "duzenlemeTarihi": "2026-08-18",
+  "aciklama": "Hata testi"
+}
+
+### Hata testi: Düzenleme tarihi boş
+
+POST http://localhost:8080/api/raporlar
+Content-Type: application/json
+
+{
+  "vergiKimlikNo": "1234567890",
+  "tcKimlikNo": null,
+  "anaRaporTuruId": "fef60cfd-a4d4-40a0-9cb0-a179101e4ef0",
+  "raporTuruId": "40a07a33-2601-44ac-84ce-61b0aa944a23",
+  "vergiKoduId": "5e45198b-38e1-4235-9c4a-3b01ddab3715",
+  "duzenlemeTarihi": null,
+  "aciklama": "Boş tarih testi"
+}
