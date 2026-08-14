@@ -3,10 +3,10 @@ package com.example.raporkayit.service;
 import com.example.raporkayit.dto.MukellefResponse;
 import com.example.raporkayit.dto.RaporOlusturRequest;
 import com.example.raporkayit.dto.RaporResponse;
-import com.example.raporkayit.entity.AnaRaporTuru;
 import com.example.raporkayit.entity.Rapor;
 import com.example.raporkayit.entity.RaporTuru;
 import com.example.raporkayit.entity.VergiKodu;
+import com.example.raporkayit.mapper.RaporMapper;
 import com.example.raporkayit.repository.RaporRepository;
 import com.example.raporkayit.repository.RaporTuruRepository;
 import com.example.raporkayit.repository.VergiKoduRepository;
@@ -22,20 +22,23 @@ public class RaporService {
     private final RaporTuruRepository raporTuruRepository;
     private final VergiKoduRepository vergiKoduRepository;
     private final SicilService sicilService;
+    private final RaporMapper raporMapper;   // YENİ
 
     public RaporService(RaporRepository raporRepository,
                         RaporTuruRepository raporTuruRepository,
                         VergiKoduRepository vergiKoduRepository,
-                        SicilService sicilService) {
-        this.raporRepository = raporRepository; //yeni oluşturduğumuz Rapor'u veritabanına kaydetmek için
-        this.raporTuruRepository = raporTuruRepository;//kullanıcının seçtiği raporTuruId'nin gerçekten var olup olmadığını kontrol etmek için
+                        SicilService sicilService,
+                        RaporMapper raporMapper) {   // YENİ parametre
+        this.raporRepository = raporRepository;
+        this.raporTuruRepository = raporTuruRepository;
         this.vergiKoduRepository = vergiKoduRepository;
-        this.sicilService = sicilService; //mükellef doğrulama/bulma işini tekrar yazmak yerine, o işi zaten yapan SicilService'i çağırıyoruz
+        this.sicilService = sicilService;
+        this.raporMapper = raporMapper;   // YENİ
     }
 
     public RaporResponse raporOlustur(RaporOlusturRequest request) {
 
-        // 1) Mükellef doğrulaması — SicilService'e devrediyoruz
+        // 1) Mükellef doğrulaması
         MukellefResponse mukellef = sicilService.mukellefSorgula(
                 request.getVergiKimlikNo(),
                 request.getTcKimlikNo()
@@ -50,7 +53,7 @@ public class RaporService {
         RaporTuru raporTuru = raporTuruRepository.findById(request.getRaporTuruId())
                 .orElseThrow(() -> new EntityNotFoundException("Rapor türü bulunamadı."));
 
-        if (!raporTuru.getAnaRaporTuru() //Veritabanındaki gerçek ana rapor türü ID’si, kullanıcının gönderdiği ana rapor türü ID’sine eşit değilse hata ver.
+        if (!raporTuru.getAnaRaporTuru()
                 .getAnaRaporTuruId()
                 .equals(request.getAnaRaporTuruId())) {
 
@@ -63,22 +66,22 @@ public class RaporService {
                 .orElseThrow(() -> new EntityNotFoundException("Vergi kodu bulunamadı."));
 
         // 4) Yeni Entity'yi kur
-        Rapor rapor = new Rapor();
-        rapor.setRaporKayitNo(raporKayitNoUret());
-        rapor.setVergiKimlikNo(request.getVergiKimlikNo());
-        rapor.setTcKimlikNo(request.getTcKimlikNo());
-        rapor.setAdSoyadUnvan(mukellef.getAdSoyadUnvan());
-        rapor.setDuzenlemeTarihi(request.getDuzenlemeTarihi());
-        rapor.setAciklama(request.getAciklama());
-        rapor.setDurum("KAYITLI");
-        rapor.setRaporTuru(raporTuru);
-        rapor.setVergiKodu(vergiKodu);
-
+        Rapor rapor = Rapor.builder()
+                .raporKayitNo(raporKayitNoUret())
+                .vergiKimlikNo(request.getVergiKimlikNo())
+                .tcKimlikNo(request.getTcKimlikNo())
+                .adSoyadUnvan(mukellef.getAdSoyadUnvan())
+                .duzenlemeTarihi(request.getDuzenlemeTarihi())
+                .aciklama(request.getAciklama())
+                .durum("KAYITLI")
+                .raporTuru(raporTuru)
+                .vergiKodu(vergiKodu)
+                .build();
         // 5) Veritabanına yaz
         Rapor kaydedilen = raporRepository.save(rapor);
 
-        // 6) DTO'ya çevirip dön
-        return toResponse(kaydedilen);
+        // 6) DTO'ya çevirip dön — artık Mapper'a devrediyoruz
+        return raporMapper.toResponse(kaydedilen);
     }
 
     private String raporKayitNoUret() {
@@ -89,20 +92,5 @@ public class RaporService {
             kod = "RPR-" + yil + "-" + rastgele;
         } while (raporRepository.existsByRaporKayitNo(kod));
         return kod;
-    }
-
-    private RaporResponse toResponse(Rapor r) {
-        RaporTuru rt = r.getRaporTuru(); //bu rapora bağlı olan RaporTuru nesnesinin tamamını bana ver
-        AnaRaporTuru art = rt.getAnaRaporTuru(); //Rapor → RaporTuru → AnaRaporTuru
-        VergiKodu vk = r.getVergiKodu(); //r'nin vergi kodu
-
-        return new RaporResponse( //Parantez içindeki her satır, o değişkenlerden tek tek alan çekip DTO'nun constructor'ına sırayla veriyoruz
-                r.getRaporId(), r.getRaporKayitNo(),
-                r.getVergiKimlikNo(), r.getTcKimlikNo(), r.getAdSoyadUnvan(),
-                r.getDuzenlemeTarihi(), r.getAciklama(), r.getDurum(),
-                art.getAnaRaporTuruId(), art.getAnaRaporTuruKodu(), art.getAnaRaporTuruAdi(),
-                rt.getRaporTuruId(), rt.getRaporTuruKodu(), rt.getRaporTuruAdi(),
-                vk.getVergiKoduId(), vk.getVergiKodu(), vk.getVergiKoduAdi()
-        );
     }
 }

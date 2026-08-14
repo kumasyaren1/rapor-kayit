@@ -4,13 +4,18 @@ package com.example.raporkayit.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "rapor")
 public class Rapor {
