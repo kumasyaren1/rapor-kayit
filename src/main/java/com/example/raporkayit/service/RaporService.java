@@ -27,10 +27,10 @@ public class RaporService {
                         RaporTuruRepository raporTuruRepository,
                         VergiKoduRepository vergiKoduRepository,
                         SicilService sicilService) {
-        this.raporRepository = raporRepository;
-        this.raporTuruRepository = raporTuruRepository;
+        this.raporRepository = raporRepository; //yeni oluşturduğumuz Rapor'u veritabanına kaydetmek için
+        this.raporTuruRepository = raporTuruRepository;//kullanıcının seçtiği raporTuruId'nin gerçekten var olup olmadığını kontrol etmek için
         this.vergiKoduRepository = vergiKoduRepository;
-        this.sicilService = sicilService;
+        this.sicilService = sicilService; //mükellef doğrulama/bulma işini tekrar yazmak yerine, o işi zaten yapan SicilService'i çağırıyoruz
     }
 
     public RaporResponse raporOlustur(RaporOlusturRequest request) {
@@ -50,7 +50,7 @@ public class RaporService {
         RaporTuru raporTuru = raporTuruRepository.findById(request.getRaporTuruId())
                 .orElseThrow(() -> new EntityNotFoundException("Rapor türü bulunamadı."));
 
-        if (!raporTuru.getAnaRaporTuru()
+        if (!raporTuru.getAnaRaporTuru() //Veritabanındaki gerçek ana rapor türü ID’si, kullanıcının gönderdiği ana rapor türü ID’sine eşit değilse hata ver.
                 .getAnaRaporTuruId()
                 .equals(request.getAnaRaporTuruId())) {
 
@@ -58,7 +58,7 @@ public class RaporService {
                     "Seçilen rapor türü, seçilen ana rapor türüne ait değildir."
             );
         }
-        
+
         VergiKodu vergiKodu = vergiKoduRepository.findById(request.getVergiKoduId())
                 .orElseThrow(() -> new EntityNotFoundException("Vergi kodu bulunamadı."));
 
@@ -92,11 +92,11 @@ public class RaporService {
     }
 
     private RaporResponse toResponse(Rapor r) {
-        RaporTuru rt = r.getRaporTuru();
-        AnaRaporTuru art = rt.getAnaRaporTuru();
-        VergiKodu vk = r.getVergiKodu();
+        RaporTuru rt = r.getRaporTuru(); //bu rapora bağlı olan RaporTuru nesnesinin tamamını bana ver
+        AnaRaporTuru art = rt.getAnaRaporTuru(); //Rapor → RaporTuru → AnaRaporTuru
+        VergiKodu vk = r.getVergiKodu(); //r'nin vergi kodu
 
-        return new RaporResponse(
+        return new RaporResponse( //Parantez içindeki her satır, o değişkenlerden tek tek alan çekip DTO'nun constructor'ına sırayla veriyoruz
                 r.getRaporId(), r.getRaporKayitNo(),
                 r.getVergiKimlikNo(), r.getTcKimlikNo(), r.getAdSoyadUnvan(),
                 r.getDuzenlemeTarihi(), r.getAciklama(), r.getDurum(),
