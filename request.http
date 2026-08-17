@@ -64,3 +64,6 @@ Content-Type: application/json
   "duzenlemeTarihi": null,
   "aciklama": "Boş tarih testi"
 }
+### Rapor görüntüle
+GET http://localhost:8080/api/raporlar/0fcfe3df-eb6e-4474-9a9f-c2b79c7b88f3
+Accept: application/json

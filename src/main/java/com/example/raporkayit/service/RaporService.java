@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 public class RaporService {
@@ -92,5 +93,11 @@ public class RaporService {
             kod = "RPR-" + yil + "-" + rastgele;
         } while (raporRepository.existsByRaporKayitNo(kod));
         return kod;
+    }
+    public RaporResponse raporGetir(UUID id) {
+        Rapor rapor = raporRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Rapor bulunamadı."));
+
+        return raporMapper.toResponse(rapor);
     }
 }
