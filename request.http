@@ -65,5 +65,58 @@ Content-Type: application/json
   "aciklama": "Boş tarih testi"
 }
 ### Rapor görüntüle
-GET http://localhost:8080/api/raporlar/0fcfe3df-eb6e-4474-9a9f-c2b79c7b88f3
+GET http://localhost:8080/api/raporlar/9c24f6ac-5cca-432b-82c7-3dd1a8e4727b
 Accept: application/json
+
+### Tüm raporları listele (filtresiz)
+GET http://localhost:8080/api/raporlar
+
+### Sadece KAYITLI olanları, sayfa 0, 5 kayıt
+GET http://localhost:8080/api/raporlar?durum=KAYITLI&page=0&size=5
+
+### Tarih aralığına göre filtrele
+GET http://localhost:8080/api/raporlar?baslangicTarihi=2026-01-01&bitisTarihi=2026-12-31
+
+### Rapor güncelle
+PUT http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902
+Content-Type: application/json
+
+{
+  "vergiKimlikNo": "1234567890",
+  "anaRaporTuruId": "fef60cfd-a4d4-40a0-9cb0-a179101e4ef0",
+  "raporTuruId": "43405c79-606e-43a2-8608-2cef9bd4549c",
+  "vergiKoduId": "5e45198b-38e1-4235-9c4a-3b01ddab3715",
+  "duzenlemeTarihi": "2026-08-11",
+  "aciklama": "Güncellendi"
+}
+
+### Cevap kaydet
+POST http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902/cevap
+Content-Type: application/json
+
+{
+  "cevapNumarasi": "CVP-2026-0001",
+  "cevapTarihi": "2026-08-12",
+  "cevapSonucu": "Uygun bulunmuştur"
+}
+
+### Tahakkuk kes
+POST http://localhost:8080/api/raporlar/b66d571d-74b3-4d40-9317-3397fbe37af8/tahakkuk
+
+### Rapor iptal et
+PUT http://localhost:8080/api/raporlar/e42d021b-f035-4569-9467-d0918a63401d/iptal
+
+### Zaten TAHAKKUK_KESILDI olan rapora tekrar tahakkuk kesmeyi dene
+POST http://localhost:8080/api/raporlar/b66d571d-74b3-4d40-9317-3397fbe37af8/tahakkuk
+
+### Olmayan bir rapor ID'si ile görüntüleme
+GET http://localhost:8080/api/raporlar/00000000-0000-0000-0000-000000000000
+
+### Listele
+GET http://localhost:8080/api/raporlar?durum=CEVAPLANDI
+
+### Cevaplanana tahakkuk kesmeyi dene
+POST http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902/tahakkuk
+
+### Aynı rapora tekrar tahakkuk kesmeyi dene
+POST http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902/tahakkuk

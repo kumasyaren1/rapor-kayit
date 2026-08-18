@@ -11,4 +11,5 @@ import java.util.UUID;
 @Repository
 public interface RaporRepository extends JpaRepository<Rapor, UUID>, JpaSpecificationExecutor<Rapor> {
     Optional<Rapor> findByRaporKayitNo(String raporKayitNo);
+    boolean existsByRaporKayitNo(String raporKayitNo);
 }

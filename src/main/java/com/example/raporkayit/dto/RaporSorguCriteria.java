@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,8 +14,8 @@ public class RaporSorguCriteria {
     private String vergiKimlikNo;
     private String tcKimlikNo;
     private String durum;
-    private String anaRaporTuruId;
-    private String raporTuruId;
+    private UUID anaRaporTuruId;
+    private UUID raporTuruId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate baslangicTarihi;

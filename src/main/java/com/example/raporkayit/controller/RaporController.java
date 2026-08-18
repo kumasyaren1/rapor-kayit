@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/raporlar")
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class RaporController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RaporResponse> getirById(@PathVariable String id) {
+    public ResponseEntity<RaporResponse> getirById(@PathVariable UUID id) {
         return ResponseEntity.ok(raporService.getirById(id));
     }
 
@@ -39,24 +41,24 @@ public class RaporController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RaporResponse> guncelle(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @RequestBody @Valid RaporOlusturRequest request) {
         return ResponseEntity.ok(raporService.guncelle(id, request));
     }
 
     @PutMapping("/{id}/iptal")
-    public ResponseEntity<RaporResponse> iptalEt(@PathVariable String id) {
+    public ResponseEntity<RaporResponse> iptalEt(@PathVariable UUID id) {
         return ResponseEntity.ok(raporService.iptalEt(id));
     }
 
     @PostMapping("/{id}/tahakkuk")
-    public ResponseEntity<RaporResponse> tahakkukKes(@PathVariable String id) {
+    public ResponseEntity<RaporResponse> tahakkukKes(@PathVariable UUID id) {
         return ResponseEntity.ok(raporService.tahakkukKes(id));
     }
 
     @PostMapping("/{id}/cevap")
     public ResponseEntity<RaporResponse> cevapKaydet(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @RequestBody @Valid CevapKayitRequest request) {
         return ResponseEntity.ok(raporService.cevapKaydet(id, request));
     }

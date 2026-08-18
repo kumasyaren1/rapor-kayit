@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
                 message
         );
     }
+    //isteğin kendisi geçerli ama şu anki durumla çelişiyor
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     private ResponseEntity<Map<String, Object>> buildResponse(
             HttpStatus status,
