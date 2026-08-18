@@ -145,6 +145,11 @@ public class RaporService {
         if (!"KAYITLI".equals(rapor.getDurum())) {
             throw new IllegalStateException("Sadece KAYITLI durumundaki raporlar güncellenebilir.");
         }
+        if (request.getDuzenlemeTarihi().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Düzenleme tarihi bugünden ileri olamaz."
+            );
+        }
 
         RaporTuru raporTuru = raporTuruRepository.findById(request.getRaporTuruId())
                 .orElseThrow(() -> new EntityNotFoundException("Rapor türü bulunamadı."));
@@ -227,10 +232,11 @@ public class RaporService {
     public RaporResponse tahakkukKes(UUID id) {
         Rapor rapor = bul(id);
 
-        if ("IPTAL".equals(rapor.getDurum()) || "TAHAKKUK_KESILDI".equals(rapor.getDurum())) {
-            throw new IllegalStateException("İptal edilmiş veya tahakkuku zaten kesilmiş rapora işlem yapılamaz.");
+        if (!"KAYITLI".equals(rapor.getDurum())) {
+            throw new IllegalStateException(
+                    "Sadece KAYITLI durumundaki raporlara tahakkuk kesilebilir."
+            );
         }
-
         Tahakkuk tahakkuk = Tahakkuk.builder()
                 .tahakkukFisNo(tahakkukFisNoUret())
                 .tahakkukTarihi(LocalDate.now())
