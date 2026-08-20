@@ -35,7 +35,7 @@ public class RaporController {
     @GetMapping
     public ResponseEntity<Page<RaporResponse>> sorgula(
             @ModelAttribute RaporSorguCriteria criteria,
-            @PageableDefault(sort = "duzenlemeTarihi", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "duzenlemeTarihi", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(raporService.sorgula(criteria, pageable));
     }
 

@@ -120,3 +120,9 @@ POST http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902/tah
 
 ### Aynı rapora tekrar tahakkuk kesmeyi dene
 POST http://localhost:8080/api/raporlar/3c6f0181-98d8-4112-8609-ccc049303902/tahakkuk
+
+### Ters tarih aralığı - hata beklenir
+GET http://localhost:8080/api/raporlar?baslangicTarihi=2026-12-31&bitisTarihi=2026-01-01
+
+### Varsayılan sayfa boyutu - 10 kayıt gelmeli
+GET http://localhost:8080/api/raporlar

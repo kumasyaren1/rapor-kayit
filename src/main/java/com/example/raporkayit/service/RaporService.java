@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// @RequiredArgsConstructor — Lombok'a "tüm 'final' alanları içeren bir constructor üret" diyoruz.
-// Bu, RaporController'da elle yazdığımız constructor'ın BİREBİR AYNISINI otomatik üretiyor
-// (dependency injection mantığı hiç değişmedi, sadece 7 satırlık constructor kodunu yazmaktan kurtulduk).
 @Service
 @RequiredArgsConstructor
 public class RaporService {
@@ -89,13 +86,13 @@ public class RaporService {
     @Transactional(readOnly = true)
     public Page<RaporResponse> sorgula(RaporSorguCriteria criteria, Pageable pageable) {
 
-        // Specification: veritabanına gidecek WHERE koşulunu, hangi filtreler
-        // doluysa ona göre PARÇA PARÇA inşa etmemizi sağlayan bir JPA aracı.
-        // Kullanıcı sadece "durum" filtrelediyse, sadece "WHERE durum = ..." üretilir;
-        // hem "durum" hem "vergiKimlikNo" doldurduysa, ikisi "AND" ile birleşir.
-        // Mantığı Repository'deki "isimden otomatik SQL üretimi" ile aynı aileden,
-        // sadece burada koşullar SABİT değil, İSTEĞE göre DEĞİŞKEN.
+        if (criteria.getBaslangicTarihi() != null && criteria.getBitisTarihi() != null
+                && criteria.getBaslangicTarihi().isAfter(criteria.getBitisTarihi())) {
+            throw new IllegalArgumentException("Başlangıç tarihi, bitiş tarihinden sonra olamaz.");
+        }
+
         Specification<Rapor> spec = (root, query, cb) -> {
+
             List<Predicate> kosullar = new ArrayList<>();
 
             if (StringUtils.hasText(criteria.getRaporKayitNo())) {
@@ -128,10 +125,6 @@ public class RaporService {
             return cb.and(kosullar.toArray(new Predicate[0]));
         };
 
-        // findAll(spec, pageable): Specification'daki koşullarla FİLTRELE,
-        // pageable'daki sayfa/boyut/sıralama bilgisiyle SAYFALA.
-        // .map(raporMapper::toResponse): dönen Page<Rapor> (Entity), Page<RaporResponse) (DTO)'ya çevriliyor
-        // — burada da Mapper'ı tekrar kullanıyoruz, ayrı bir çeviri kodu yazmadık.
         return raporRepository.findAll(spec, pageable).map(raporMapper::toResponse);
     }
 
@@ -161,12 +154,6 @@ public class RaporService {
         VergiKodu vergiKodu = vergiKoduRepository.findById(request.getVergiKoduId())
                 .orElseThrow(() -> new EntityNotFoundException("Vergi kodu bulunamadı."));
 
-        // Dikkat: burada Builder KULLANMIYORUZ. Builder, YENİ bir nesne kurarken işe yarar.
-        // Burada elimizde zaten veritabanından çekilmiş, Hibernate'in "gözetimindeki" (managed)
-        // bir Rapor var — sadece alanlarını değiştiriyoruz, Hibernate bu değişikliği kendisi
-        // fark edip (dirty checking) metot bitince otomatik UPDATE atacak. Bu yüzden
-        // raporRepository.save(...) çağırmaya bile GEREK YOK, ama okunabilirlik için
-        // yine de açıkça çağırıyoruz.
         rapor.setRaporTuru(raporTuru);
         rapor.setVergiKodu(vergiKodu);
         rapor.setDuzenlemeTarihi(request.getDuzenlemeTarihi());
@@ -192,10 +179,6 @@ public class RaporService {
 
     // ============================================================
     // UC-05: Cevap Kayıt
-    // Burada GERÇEKTEN 2 ayrı veritabanı işlemi var (Cevap kaydet + Rapor durumunu güncelle).
-    // @Transactional konuşmamızdaki tam senaryo bu — ikisi de ya birlikte başarılı olmalı,
-    // ya da (bir hata çıkarsa) ikisi de geri alınmalı. Metodun üstündeki @Transactional
-    // bunu garanti ediyor.
     // ============================================================
     @Transactional
     public RaporResponse cevapKaydet(UUID id, CevapKayitRequest request) {
@@ -232,9 +215,9 @@ public class RaporService {
     public RaporResponse tahakkukKes(UUID id) {
         Rapor rapor = bul(id);
 
-        if (!"KAYITLI".equals(rapor.getDurum())) {
+        if (!"KAYITLI".equals(rapor.getDurum()) && !"CEVAPLANDI".equals(rapor.getDurum())) {
             throw new IllegalStateException(
-                    "Sadece KAYITLI durumundaki raporlara tahakkuk kesilebilir."
+                    "Sadece KAYITLI ve CEVAPLANDI durumundaki raporlara tahakkuk kesilebilir."
             );
         }
         Tahakkuk tahakkuk = Tahakkuk.builder()
