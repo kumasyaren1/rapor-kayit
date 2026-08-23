@@ -1,5 +1,6 @@
 package com.example.raporkayit.dto;
 
+import com.example.raporkayit.Enum.RaporDurumu;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,7 +14,7 @@ public class RaporSorguCriteria {
     private String raporKayitNo;
     private String vergiKimlikNo;
     private String tcKimlikNo;
-    private String durum;
+    private RaporDurumu durum;
     private UUID anaRaporTuruId;
     private UUID raporTuruId;
 

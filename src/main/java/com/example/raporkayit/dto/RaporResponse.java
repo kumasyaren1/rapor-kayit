@@ -1,4 +1,5 @@
 package com.example.raporkayit.dto;
+import com.example.raporkayit.Enum.RaporDurumu;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
@@ -17,7 +18,7 @@ public class RaporResponse {
 
     private final LocalDate duzenlemeTarihi;
     private final String aciklama;
-    private final String durum;
+    private final RaporDurumu durum;
 
     private final UUID anaRaporTuruId;
     private final String anaRaporTuruKodu;

@@ -1,6 +1,7 @@
 package com.example.raporkayit.entity;
 
 
+import com.example.raporkayit.Enum.RaporDurumu;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,10 +54,9 @@ public class Rapor {
              length = 255)
     private String aciklama;
 
-    @Column (name = "durum",
-             nullable = false,
-             length = 30)
-    private String durum;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "durum", nullable = false, length = 30)
+    private RaporDurumu durum;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "rapor_turu_id", nullable = false)

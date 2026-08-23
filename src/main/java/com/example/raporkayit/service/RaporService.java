@@ -1,5 +1,6 @@
 package com.example.raporkayit.service;
 
+import com.example.raporkayit.Enum.RaporDurumu;
 import com.example.raporkayit.dto.*;
 import com.example.raporkayit.entity.*;
 import com.example.raporkayit.mapper.RaporMapper;
@@ -63,7 +64,7 @@ public class RaporService {
                 .adSoyadUnvan(mukellef.getAdSoyadUnvan())
                 .duzenlemeTarihi(request.getDuzenlemeTarihi())
                 .aciklama(request.getAciklama())
-                .durum("KAYITLI")
+                .durum(RaporDurumu.KAYITLI)
                 .raporTuru(raporTuru)
                 .vergiKodu(vergiKodu)
                 .build();
@@ -86,13 +87,7 @@ public class RaporService {
     @Transactional(readOnly = true)
     public Page<RaporResponse> sorgula(RaporSorguCriteria criteria, Pageable pageable) {
 
-        if (criteria.getBaslangicTarihi() != null && criteria.getBitisTarihi() != null
-                && criteria.getBaslangicTarihi().isAfter(criteria.getBitisTarihi())) {
-            throw new IllegalArgumentException("Başlangıç tarihi, bitiş tarihinden sonra olamaz.");
-        }
-
         Specification<Rapor> spec = (root, query, cb) -> {
-
             List<Predicate> kosullar = new ArrayList<>();
 
             if (StringUtils.hasText(criteria.getRaporKayitNo())) {
@@ -104,7 +99,8 @@ public class RaporService {
             if (StringUtils.hasText(criteria.getTcKimlikNo())) {
                 kosullar.add(cb.equal(root.get("tcKimlikNo"), criteria.getTcKimlikNo().trim()));
             }
-            if (StringUtils.hasText(criteria.getDurum())) {
+            // durum artık RaporDurumu (enum) — null kontrolü yeterli, hasText metin için gereksiz.
+            if (criteria.getDurum() != null) {
                 kosullar.add(cb.equal(root.get("durum"), criteria.getDurum()));
             }
             if (criteria.getRaporTuruId() != null) {
@@ -135,7 +131,7 @@ public class RaporService {
     public RaporResponse guncelle(UUID id, RaporOlusturRequest request) {
         Rapor rapor = bul(id);
 
-        if (!"KAYITLI".equals(rapor.getDurum())) {
+        if (rapor.getDurum() != RaporDurumu.KAYITLI) {
             throw new IllegalStateException("Sadece KAYITLI durumundaki raporlar güncellenebilir.");
         }
         if (request.getDuzenlemeTarihi().isAfter(LocalDate.now())) {
@@ -169,11 +165,11 @@ public class RaporService {
     public RaporResponse iptalEt(UUID id) {
         Rapor rapor = bul(id);
 
-        if (!"KAYITLI".equals(rapor.getDurum())) {
+        if (rapor.getDurum() != RaporDurumu.KAYITLI) {
             throw new IllegalStateException("Sadece KAYITLI durumundaki raporlar iptal edilebilir.");
         }
 
-        rapor.setDurum("IPTAL");
+        rapor.setDurum(RaporDurumu.IPTAL);
         return raporMapper.toResponse(raporRepository.save(rapor));
     }
 
@@ -184,7 +180,7 @@ public class RaporService {
     public RaporResponse cevapKaydet(UUID id, CevapKayitRequest request) {
         Rapor rapor = bul(id);
 
-        if (!"KAYITLI".equals(rapor.getDurum())) {
+        if (rapor.getDurum() != RaporDurumu.KAYITLI) {
             throw new IllegalStateException("Sadece KAYITLI durumundaki raporlara cevap eklenebilir.");
         }
 
@@ -201,9 +197,9 @@ public class RaporService {
                 .sonuc(request.getCevapSonucu())
                 .rapor(rapor)
                 .build();
-        cevapRepository.save(cevap);   // 1. veritabanı işlemi
+        cevapRepository.save(cevap);
 
-        rapor.setDurum("CEVAPLANDI");  // 2. işlem — dirty checking ile otomatik UPDATE
+        rapor.setDurum(RaporDurumu.CEVAPLANDI);
 
         return raporMapper.toResponse(rapor);
     }
@@ -215,9 +211,9 @@ public class RaporService {
     public RaporResponse tahakkukKes(UUID id) {
         Rapor rapor = bul(id);
 
-        if (!"KAYITLI".equals(rapor.getDurum()) && !"CEVAPLANDI".equals(rapor.getDurum())) {
+        if (rapor.getDurum() != RaporDurumu.KAYITLI) {
             throw new IllegalStateException(
-                    "Sadece KAYITLI ve CEVAPLANDI durumundaki raporlara tahakkuk kesilebilir."
+                    "Sadece KAYITLI durumundaki raporlara tahakkuk kesilebilir."
             );
         }
         Tahakkuk tahakkuk = Tahakkuk.builder()
@@ -227,7 +223,7 @@ public class RaporService {
                 .build();
         tahakkukRepository.save(tahakkuk);
 
-        rapor.setDurum("TAHAKKUK_KESILDI");
+        rapor.setDurum(RaporDurumu.TAHAKKUK_KESILDI);
 
         return raporMapper.toResponse(rapor);
     }
