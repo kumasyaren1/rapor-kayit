@@ -5,6 +5,7 @@ import com.example.raporkayit.service.RaporService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -35,8 +36,17 @@ public class RaporController {
     @GetMapping
     public ResponseEntity<Page<RaporResponse>> sorgula(
             @ModelAttribute RaporSorguCriteria criteria,
-            @PageableDefault(size = 10, sort = "duzenlemeTarihi", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(raporService.sorgula(criteria, pageable));
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        Pageable siraliPageable = pageable.getSort().isSorted()
+                ? pageable
+                : PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "duzenlemeTarihi")
+                        .and(Sort.by(Sort.Direction.DESC, "raporId")));
+
+        return ResponseEntity.ok(raporService.sorgula(criteria, siraliPageable));
     }
 
     @PutMapping("/{id}")

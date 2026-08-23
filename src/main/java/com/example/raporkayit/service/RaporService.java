@@ -211,9 +211,9 @@ public class RaporService {
     public RaporResponse tahakkukKes(UUID id) {
         Rapor rapor = bul(id);
 
-        if (rapor.getDurum() != RaporDurumu.KAYITLI) {
+        if (rapor.getDurum() != RaporDurumu.KAYITLI && rapor.getDurum() != RaporDurumu.CEVAPLANDI) {
             throw new IllegalStateException(
-                    "Sadece KAYITLI durumundaki raporlara tahakkuk kesilebilir."
+                    "Sadece KAYITLI ve CEVAPLANDI durumundaki raporlara tahakkuk kesilebilir."
             );
         }
         Tahakkuk tahakkuk = Tahakkuk.builder()
