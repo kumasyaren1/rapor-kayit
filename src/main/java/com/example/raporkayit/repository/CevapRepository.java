@@ -4,9 +4,12 @@ import com.example.raporkayit.entity.Cevap;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CevapRepository
-    extends JpaRepository<Cevap, UUID> {
+        extends JpaRepository<Cevap, UUID> {
+
+    Optional<Cevap> findByRapor_RaporId(UUID raporId);
 }

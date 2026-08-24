@@ -31,4 +31,11 @@ public class RaporResponse {
     private final UUID vergiKoduId;
     private final String vergiKodu;
     private final String vergiKoduAdi;
+
+    private final String cevapNumarasi;
+    private final LocalDate cevapTarihi;
+    private final String cevapSonucu;
+
+    private final String tahakkukFisNo;
+    private final LocalDate tahakkukTarihi;
 }

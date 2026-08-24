@@ -78,7 +78,9 @@ public class RaporService {
     @Transactional(readOnly = true)
     public RaporResponse getirById(UUID id) {
         Rapor rapor = bul(id);
-        return raporMapper.toResponse(rapor);
+        Cevap cevap = cevapRepository.findByRapor_RaporId(id).orElse(null);
+        Tahakkuk tahakkuk = tahakkukRepository.findByRapor_RaporId(id).orElse(null);
+        return raporMapper.toResponse(rapor, cevap, tahakkuk);
     }
 
     // ============================================================
@@ -201,7 +203,7 @@ public class RaporService {
 
         rapor.setDurum(RaporDurumu.CEVAPLANDI);
 
-        return raporMapper.toResponse(rapor);
+        return raporMapper.toResponse(rapor, cevap, null);
     }
 
     // ============================================================
@@ -225,7 +227,7 @@ public class RaporService {
 
         rapor.setDurum(RaporDurumu.TAHAKKUK_KESILDI);
 
-        return raporMapper.toResponse(rapor);
+        return raporMapper.toResponse(rapor, null, tahakkuk);
     }
 
     // ============================================================
