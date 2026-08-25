@@ -9,7 +9,4 @@ import java.util.UUID;
 
 @Repository
 public interface CevapRepository
-        extends JpaRepository<Cevap, UUID> {
-
-    Optional<Cevap> findByRapor_RaporId(UUID raporId);
-}
+        extends JpaRepository<Cevap, UUID> {}

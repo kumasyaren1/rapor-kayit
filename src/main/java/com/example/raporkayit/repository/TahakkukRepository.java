@@ -9,7 +9,4 @@ import java.util.UUID;
 
 @Repository
 public interface TahakkukRepository
-        extends JpaRepository<Tahakkuk, UUID> {
-
-    Optional<Tahakkuk> findByRapor_RaporId(UUID raporId);
-}
+        extends JpaRepository<Tahakkuk, UUID> {}

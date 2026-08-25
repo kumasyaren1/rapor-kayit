@@ -3,9 +3,10 @@ package com.example.raporkayit.service;
 import com.example.raporkayit.Enum.RaporDurumu;
 import com.example.raporkayit.dto.*;
 import com.example.raporkayit.entity.*;
+import com.example.raporkayit.exception.ApplicationException;
+import com.example.raporkayit.exception.ErrorCode;
 import com.example.raporkayit.mapper.RaporMapper;
 import com.example.raporkayit.repository.*;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,18 +45,18 @@ public class RaporService {
         );
 
         if (request.getDuzenlemeTarihi().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Düzenleme tarihi bugünden ileri olamaz.");
+            throw new ApplicationException(ErrorCode.DUZENLEME_TARIHI_ILERI);
         }
 
         RaporTuru raporTuru = raporTuruRepository.findById(request.getRaporTuruId())
-                .orElseThrow(() -> new EntityNotFoundException("Rapor türü bulunamadı."));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.RAPOR_TURU_NOT_FOUND));
 
         if (!raporTuru.getAnaRaporTuru().getAnaRaporTuruId().equals(request.getAnaRaporTuruId())) {
-            throw new IllegalArgumentException("Seçilen rapor türü, seçilen ana rapor türüne ait değildir.");
+            throw new ApplicationException(ErrorCode.RAPOR_TURU_UYUMSUZ);
         }
 
         VergiKodu vergiKodu = vergiKoduRepository.findById(request.getVergiKoduId())
-                .orElseThrow(() -> new EntityNotFoundException("Vergi kodu bulunamadı."));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.VERGI_KODU_NOT_FOUND));
 
         Rapor rapor = Rapor.builder()
                 .raporKayitNo(raporKayitNoUret())
@@ -78,9 +79,7 @@ public class RaporService {
     @Transactional(readOnly = true)
     public RaporResponse getirById(UUID id) {
         Rapor rapor = bul(id);
-        Cevap cevap = cevapRepository.findByRapor_RaporId(id).orElse(null);
-        Tahakkuk tahakkuk = tahakkukRepository.findByRapor_RaporId(id).orElse(null);
-        return raporMapper.toResponse(rapor, cevap, tahakkuk);
+        return raporMapper.toResponse(rapor);
     }
 
     // ============================================================
@@ -101,7 +100,6 @@ public class RaporService {
             if (StringUtils.hasText(criteria.getTcKimlikNo())) {
                 kosullar.add(cb.equal(root.get("tcKimlikNo"), criteria.getTcKimlikNo().trim()));
             }
-            // durum artık RaporDurumu (enum) — null kontrolü yeterli, hasText metin için gereksiz.
             if (criteria.getDurum() != null) {
                 kosullar.add(cb.equal(root.get("durum"), criteria.getDurum()));
             }
@@ -134,30 +132,28 @@ public class RaporService {
         Rapor rapor = bul(id);
 
         if (rapor.getDurum() != RaporDurumu.KAYITLI) {
-            throw new IllegalStateException("Sadece KAYITLI durumundaki raporlar güncellenebilir.");
+            throw new ApplicationException(ErrorCode.RAPOR_SADECE_KAYITLI_GUNCELLENEBILIR);
         }
         if (request.getDuzenlemeTarihi().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException(
-                    "Düzenleme tarihi bugünden ileri olamaz."
-            );
+            throw new ApplicationException(ErrorCode.DUZENLEME_TARIHI_ILERI);
         }
 
         RaporTuru raporTuru = raporTuruRepository.findById(request.getRaporTuruId())
-                .orElseThrow(() -> new EntityNotFoundException("Rapor türü bulunamadı."));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.RAPOR_TURU_NOT_FOUND));
 
         if (!raporTuru.getAnaRaporTuru().getAnaRaporTuruId().equals(request.getAnaRaporTuruId())) {
-            throw new IllegalArgumentException("Seçilen rapor türü, seçilen ana rapor türüne ait değildir.");
+            throw new ApplicationException(ErrorCode.RAPOR_TURU_UYUMSUZ);
         }
 
         VergiKodu vergiKodu = vergiKoduRepository.findById(request.getVergiKoduId())
-                .orElseThrow(() -> new EntityNotFoundException("Vergi kodu bulunamadı."));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.VERGI_KODU_NOT_FOUND));
 
         rapor.setRaporTuru(raporTuru);
         rapor.setVergiKodu(vergiKodu);
         rapor.setDuzenlemeTarihi(request.getDuzenlemeTarihi());
         rapor.setAciklama(request.getAciklama());
 
-        return raporMapper.toResponse(raporRepository.save(rapor));
+        return raporMapper.toResponse(rapor);
     }
 
     // ============================================================
@@ -168,11 +164,11 @@ public class RaporService {
         Rapor rapor = bul(id);
 
         if (rapor.getDurum() != RaporDurumu.KAYITLI) {
-            throw new IllegalStateException("Sadece KAYITLI durumundaki raporlar iptal edilebilir.");
+            throw new ApplicationException(ErrorCode.RAPOR_SADECE_KAYITLI_IPTAL_EDILEBILIR);
         }
 
         rapor.setDurum(RaporDurumu.IPTAL);
-        return raporMapper.toResponse(raporRepository.save(rapor));
+        return raporMapper.toResponse(rapor);
     }
 
     // ============================================================
@@ -183,14 +179,13 @@ public class RaporService {
         Rapor rapor = bul(id);
 
         if (rapor.getDurum() != RaporDurumu.KAYITLI) {
-            throw new IllegalStateException("Sadece KAYITLI durumundaki raporlara cevap eklenebilir.");
+            throw new ApplicationException(ErrorCode.RAPOR_SADECE_KAYITLI_CEVAPLANABILIR);
         }
-
         if (request.getCevapTarihi().isBefore(rapor.getDuzenlemeTarihi())) {
-            throw new IllegalArgumentException("Cevap tarihi, rapor tarihinden önce olamaz.");
+            throw new ApplicationException(ErrorCode.CEVAP_TARIHI_RAPOR_TARIHINDEN_ONCE);
         }
         if (request.getCevapTarihi().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Cevap tarihi bugünden ileri olamaz.");
+            throw new ApplicationException(ErrorCode.CEVAP_TARIHI_ILERI);
         }
 
         Cevap cevap = Cevap.builder()
@@ -203,7 +198,7 @@ public class RaporService {
 
         rapor.setDurum(RaporDurumu.CEVAPLANDI);
 
-        return raporMapper.toResponse(rapor, cevap, null);
+        return raporMapper.toResponse(rapor);
     }
 
     // ============================================================
@@ -214,10 +209,9 @@ public class RaporService {
         Rapor rapor = bul(id);
 
         if (rapor.getDurum() != RaporDurumu.KAYITLI && rapor.getDurum() != RaporDurumu.CEVAPLANDI) {
-            throw new IllegalStateException(
-                    "Sadece KAYITLI ve CEVAPLANDI durumundaki raporlara tahakkuk kesilebilir."
-            );
+            throw new ApplicationException(ErrorCode.RAPOR_TAHAKKUK_KESILEMEZ_DURUM);
         }
+
         Tahakkuk tahakkuk = Tahakkuk.builder()
                 .tahakkukFisNo(tahakkukFisNoUret())
                 .tahakkukTarihi(LocalDate.now())
@@ -227,7 +221,7 @@ public class RaporService {
 
         rapor.setDurum(RaporDurumu.TAHAKKUK_KESILDI);
 
-        return raporMapper.toResponse(rapor, null, tahakkuk);
+        return raporMapper.toResponse(rapor);
     }
 
     // ============================================================
@@ -235,7 +229,7 @@ public class RaporService {
     // ============================================================
     private Rapor bul(UUID id) {
         return raporRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Rapor bulunamadı: " + id));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.RAPOR_NOT_FOUND, id.toString()));
     }
 
     private String raporKayitNoUret() {
